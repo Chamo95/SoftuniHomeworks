@@ -1,0 +1,67 @@
+package FamilyTree8;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+
+public class Main {
+
+	public static void main(String[] args) throws IOException {
+		Map<String,List<String>> parentChildren=new LinkedHashMap<>(); 
+		List<Person> people=new ArrayList<>();
+		BufferedReader reader=new BufferedReader(new InputStreamReader(System.in));
+		String personId=reader.readLine();
+		reader.lines().takeWhile(line->!line.equals("End")).forEach(
+		line->{
+			if(line.contains("-")) {
+				String data[]=line.split(" - ");
+				String parent=data[0]; String child=data[1];
+				parentChildren.putIfAbsent(parent, new ArrayList<String>());
+				parentChildren.get(parent).add(child);
+			}
+			else
+			{
+				String data[]=line.split("\\s+");
+				String name=data[0]+" "+data[1]; String birthday=data[2];
+				people.add(new Person(name,birthday));
+			}
+				
+		});
+		
+		parentChildren.forEach((parentId,children)->{
+			Person parent=findPerson(people, parentId);
+		
+			children.stream()
+			.map(childId->findPerson(people,childId)).forEach(parent::addChild);
+		});
+		
+		
+		Person forPerson = findPerson(people, personId);
+		System.out.println(getFamilyTreeFor(forPerson));
+	}
+	 private static Person findPerson(List<Person> people, String personId) {
+	        return people.stream()
+	                .filter(person -> person.getBirthDate().equals(personId) || person.getName().equals(personId))
+	                .findFirst()
+	                .orElseThrow();
+	    }
+public static String getFamilyTreeFor(Person person) {
+    return new StringBuilder()
+            .append(person.toString()).append(System.lineSeparator())
+            .append("Parents:").append(System.lineSeparator())
+            .append(person.getParents().stream().map(Person::toString)
+                    .collect(Collectors.joining(System.lineSeparator())))
+            .append(person.getParents().isEmpty() ? "" : System.lineSeparator())
+            .append("Children:").append(System.lineSeparator())
+            .append(person.getChildren().stream().map(Person::toString)
+                    .collect(Collectors.joining(System.lineSeparator())))
+            .toString();
+}
+}
