@@ -1,0 +1,1 @@
+package GenericCountMethodDoubles6;
